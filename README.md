@@ -8,6 +8,13 @@ This repository is based on [Po-Hsun-Su/pytorch-ssim](https://github.com/Po-Hsun
 
 Code of generation Einstein from random image is [here](notebooks/optimize_einstein.ipynb)
 
+Note that this code have not tested on cpu.
+
+## Requirements
+
+- chainer (6.0.0)
+- cupy (6.0.0)
+
 
 ## How to use
 
