@@ -6,7 +6,7 @@ This repository is based on [Po-Hsun-Su/pytorch-ssim](https://github.com/Po-Hsun
 
 ![](image/einstein_.png) ![](image/einstein.gif)  
 
-Code of generation Einstein from random image is [here](notebooks\optimize_einstein.ipynb)
+Code of generation Einstein from random image is [here](notebooks/optimize_einstein.ipynb)
 
 
 ## How to use
@@ -16,7 +16,7 @@ Please see [demo.py](demo.py)
 ```bash
 python demo.py
 ```
-  
+
 
 ## Reference
 
