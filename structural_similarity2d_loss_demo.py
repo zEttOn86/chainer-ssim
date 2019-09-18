@@ -6,7 +6,7 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
-import chainer_ssim.ssim_loss as chainer_ssim
+from chainer_ssim.structural_similarity2d_loss import structural_similarity2d_loss
 
 class OptimizeEinstein(chainer.Chain):
     def __init__(self, img, window_size=11, size_average=True):
@@ -18,14 +18,8 @@ class OptimizeEinstein(chainer.Chain):
 
     def __call__(self, x):
         (_, channel, _, _) = x.shape
-        xp = chainer.backends.cuda.get_array_module(x)
 
-        window = chainer_ssim.create_2d_window(self.window_size, channel, xp)
-
-        self.window = window
-        self.channel = channel
-
-        return chainer_ssim._2d_ssim(x, self.img, window, self.window_size, channel, self.size_average)
+        return structural_similarity2d_loss(x, self.img, self.window_size, self.size_average)
 
 
 if __name__ == "__main__":
@@ -46,10 +40,6 @@ if __name__ == "__main__":
     plt.show()
 
     print("----- Start optimization -----")
-    ssim_value = chainer_ssim.calc_2d_ssim(img1, img2)
-    ssim_value = chainer.backends.cuda.to_cpu(ssim_value.array)
-    print("Initial ssim:", ssim_value)
-
     ssim_loss = OptimizeEinstein(img=img2)
     ssim_loss.to_gpu()
     optimizer = chainer.optimizers.Adam()
@@ -57,20 +47,14 @@ if __name__ == "__main__":
     xp = ssim_loss.xp
     img1 = chainer.Variable(xp.array(img1, dtype=xp.float32))
 
+    ssim_value = 0.
     iter = 0
-    plt.figure()
-    plt.imshow(chainer.backends.cuda.to_cpu(F.squeeze(ssim_loss.img, axis=0).data).transpose(1,2,0))
-    plt.text(10, 30, 'SSIM = {:.3f}'.format(ssim_value), fontsize=18, color="white")
-    plt.title("random image")
-    plt.show()
-
     while ssim_value < 0.95:
         ssim_out = -ssim_loss(img1)
         optimizer.target.cleargrads()
         ssim_out.backward()
         optimizer.update()
         ssim_value = - chainer.backends.cuda.to_cpu(ssim_out.array)
-        iter += 1
         if iter % 10 == 0:
             print(ssim_value)
             # plt.figure()
@@ -79,6 +63,7 @@ if __name__ == "__main__":
             # plt.title("random image")
             # plt.show()
         # print(ssim_value)
+        iter += 1
 
     plt.figure()
     plt.imshow(chainer.backends.cuda.to_cpu(F.squeeze(ssim_loss.img, axis=0).data).transpose(1,2,0))
