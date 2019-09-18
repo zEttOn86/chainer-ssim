@@ -42,9 +42,8 @@ Please see [structural_similarity3d_loss_demo.py](structural_similarity3d_loss_d
 python structural_similarity3d_loss_demo.py
 ```
 
-||||
-|:---:|:---:|:---:|
 |Target image|Initial image|Reconstructed image|
+|:---:|:---:|:---:|
 |![](image/brain.png)|![](image/random_image.png)|![](image/reconstructed_brain.png)|
 
 ## Reference
