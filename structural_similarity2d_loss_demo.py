@@ -17,8 +17,6 @@ class OptimizeEinstein(chainer.Chain):
             self.img = chainer.Parameter(initializer=img)
 
     def __call__(self, x):
-        (_, channel, _, _) = x.shape
-
         return structural_similarity2d_loss(x, self.img, self.window_size, self.size_average)
 
 
