@@ -33,7 +33,7 @@ def gaussian_filter(img, window, pad, channel):
     h = F.convolution_3d(h, y_window, pad=(0, pad, 0), groups=channel)
     return F.convolution_3d(h, z_window, pad=(pad, 0, 0), groups=channel)
 
-def _calc_ssim(img1, img2, window, window_size, channel, size_average=True):
+def _calc_ssim(img1, img2, window, window_size, channel, data_range, size_average=True):
     mu1 = gaussian_filter(img1, window, pad=window_size//2, channel=channel)
     mu2 = gaussian_filter(img2, window, pad=window_size//2, channel=channel)
 
@@ -45,16 +45,16 @@ def _calc_ssim(img1, img2, window, window_size, channel, size_average=True):
     sigma2_sq = gaussian_filter(img2*img2, window, pad=window_size//2, channel=channel) - mu2_sq
     sigma12 = gaussian_filter(img1*img2, window, pad=window_size//2, channel=channel) - mu1_mu2
 
-    C1 = 0.01**2
-    C2 = 0.03**2
+    C1 = (0.01*data_range)**2
+    C2 = (0.03*data_range)**2
 
     ssim_map = ((2*mu1_mu2 + C1)*(2*sigma12 + C2))/((mu1_sq + mu2_sq + C1)*(sigma1_sq + sigma2_sq + C2))
     if size_average:
         return F.mean(ssim_map)
     return NotImplementedError()
 
-def structural_similarity3d_loss(img1, img2, window_size = 11, size_average = True):
+def structural_similarity3d_loss(img1, img2, window_size = 11, data_range=1, size_average = True):
     (_, channel, _, _, _) = img1.shape
     xp = chainer.backends.cuda.get_array_module(img1)
     window = create_window(window_size, channel, xp)
-    return _calc_ssim(img1, img2, window, window_size, channel, size_average)
+    return _calc_ssim(img1, img2, window, window_size, channel, data_range, size_average)

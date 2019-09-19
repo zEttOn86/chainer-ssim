@@ -17,7 +17,7 @@ def create_2d_window(window_size, channel, xp):
 
     return window
 
-def _2d_ssim(img1, img2, window, window_size, channel, size_average=True):
+def _2d_ssim(img1, img2, window, window_size, channel, data_range, size_average=True):
     mu1 = F.convolution_2d(img1, window, pad=window_size//2, groups=channel)
     mu2 = F.convolution_2d(img2, window, pad=window_size//2, groups=channel)
 
@@ -29,17 +29,17 @@ def _2d_ssim(img1, img2, window, window_size, channel, size_average=True):
     sigma2_sq = F.convolution_2d(img2*img2, window, pad=window_size//2, groups=channel) - mu2_sq
     sigma12 = F.convolution_2d(img1*img2, window, pad=window_size//2, groups=channel) - mu1_mu2
 
-    C1 = 0.01**2
-    C2 = 0.03**2
+    C1 = (0.01*data_range)**2
+    C2 = (0.03*data_range)**2
 
     ssim_map = ((2*mu1_mu2 + C1)*(2*sigma12 + C2))/((mu1_sq + mu2_sq + C1)*(sigma1_sq + sigma2_sq + C2))
     if size_average:
         return F.mean(ssim_map)
     return NotImplementedError()
 
-def calc_2d_ssim(img1, img2, window_size = 11, size_average = True):
+def calc_2d_ssim(img1, img2, window_size = 11, data_range = 1, size_average = True):
     (_, channel, _, _) = img1.shape
     xp = chainer.backends.cuda.get_array_module(img1)
     window = create_2d_window(window_size, channel, xp)
 
-    return _2d_ssim(img1, img2, window, window_size, channel, size_average)
+    return _2d_ssim(img1, img2, window, window_size, channel, data_range, size_average)
